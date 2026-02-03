@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Will you be my Valentine? 💕</title>
 
-<!-- Google Fonts -->
+<!-- Google Fonts (display=swap for faster LCP) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
 
 <!-- Open Graph / WhatsApp Preview -->
@@ -39,10 +41,16 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  pointer-events: auto; /* mouse hover/click interactivity ke liye */
+  z-index: 0;
+  pointer-events: auto;
+  background: transparent !important;
 }
-
+#particles-js canvas{
+  background: transparent !important;
+}
+canvas#particleBg{
+  background: transparent !important;
+}
 
 *{margin:0;padding:0;box-sizing:border-box}
 html{
@@ -64,10 +72,10 @@ body{
   background-repeat:no-repeat;
   background-position:center center;
   background-size:cover;
-  -webkit-background-size:cover;
   background-attachment:scroll;
   overflow:hidden;
   padding-bottom:50px;
+  padding-bottom:max(50px, env(safe-area-inset-bottom, 0px));
 }
 
 .hearts{position:fixed;inset:0;pointer-events:none;z-index:0;}
@@ -157,15 +165,18 @@ p {
 
 .btn {
   padding: 10px 20px;
+  min-height: 44px;
   font-size: 1rem;
   font-weight: 600;
   border-radius: var(--val-radius);
   cursor: pointer;
   transition: transform .3s, box-shadow .3s, color .3s, background .3s;
   border: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn:focus-visible { outline: 2px solid var(--val-pink); outline-offset: 2px; }
 .share-btn {
+  display: none;
   background: linear-gradient(135deg, var(--val-pink-light), var(--val-rose));
   color: #fff;
   border: none;
@@ -184,13 +195,13 @@ p {
   margin:0 auto;
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   padding:6px 12px;
 }
 .footer-left{
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  align-items:center;
   gap:4px;
 }
 .designer{display:flex;align-items:center;gap:6px;margin:0;padding:0}
@@ -212,7 +223,8 @@ p {
 
 @media(max-width:420px){
   .footer-inner{padding:6px 8px;}
-  .footer-right .btn{padding:8px 12px;font-size:.85rem}
+  .footer-right .btn{padding:10px 12px;font-size:.85rem;min-height:44px;}
+  .insta-link{min-height:44px;justify-content:center;}
 }
 
 .btn-yes{background:#fff;border:2px solid #ff6b9d;color:#c71585;}
@@ -223,7 +235,7 @@ p {
 
 .question-box{
   position:fixed;
-  top:15vh;
+  top:max(15vh, env(safe-area-inset-top, 0px));
   left:50%;
   transform:translateX(-50%);
   z-index:2;
@@ -247,19 +259,23 @@ p {
   h1{font-size:1.5rem;}
   p{font-size:.9rem;}
   .gif-image{max-width:180px;}
-  .btn{padding:8px 16px;font-size:.9rem;}
+  .btn{padding:10px 16px;font-size:.9rem;min-height:44px;}
   .container{margin-top:0;}
-  .question-box{top:3.5vh;padding:10px 12px;}
+  .question-box{top:max(3.5vh, env(safe-area-inset-top, 0px));padding:10px 12px;}
   body{
     background-position:center 35%;
     background-size:cover;
   }
 }
 
-/* Portrait mobile: keep teddy/heart in view */
+/* Portrait mobile: keep teddy/heart in view + question box wrap */
 @media(max-width:480px){
   body{
     background-position:center 40%;
+  }
+  .question-box{
+    white-space:normal;
+    max-width:min(92vw, 320px);
   }
 }
 
@@ -276,18 +292,23 @@ p {
     background-position:center center;
     min-height:100vh;
   }
+  .question-box{top:2vh;padding:8px 12px;}
+  .question-box h1{font-size:1.25rem;}
+  .gif-image{max-width:140px;margin:10px auto;}
+  .container{padding:0 8px;}
+  .buttons{margin-top:10px;gap:8px;}
 }
 </style>
 </head>
 <body>
 <script>
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  window.addEventListener('load', function(){ window.scrollTo(0,0); });
-  window.addEventListener('pageshow', function(e){ if (e.persisted) window.scrollTo(0,0); });
+  window.addEventListener('load', ()=> window.scrollTo(0,0));
+  window.addEventListener('pageshow', e=> { if (e.persisted) window.scrollTo(0,0); });
 </script>
 <!-- Particle Background -->
 <div id="particles-js" aria-hidden="true"></div>
-<canvas id="particleBg" style="position:fixed;inset:0;z-index:0;pointer-events:none" aria-hidden="true"></canvas>
+<canvas id="particleBg" style="position:fixed;inset:0;z-index:1;pointer-events:none" aria-hidden="true"></canvas>
 
 
 <!-- Hearts -->
@@ -305,7 +326,7 @@ p {
 
 <!-- Main Container -->
 <div class="container">
-  <img id="gifImage" class="gif-image" src="manja.gif" alt="Valentine animation" loading="lazy">
+  <img id="gifImage" class="gif-image" src="manja.gif" alt="Valentine animation" loading="lazy" decoding="async">
   <div class="buttons">
     <button type="button" class="btn btn-yes" id="yesBtn" aria-label="Say yes">Yes 💖</button>
     <button type="button" class="btn btn-no" id="noBtn" aria-label="Say no">No 😈</button>
@@ -366,19 +387,23 @@ const questions = [
 
 let step = 0;
 
-// Update Screen
 function updateScreen(){
-  questionBox.innerHTML = questions[step].text;
-  gifImage.src = questions[step].gif;
+  const q = questions[step];
+  questionBox.innerHTML = q.text;
+  gifImage.src = q.gif;
 }
 
-// No Button
 noBtn.onclick = () => {
-  if(questions[step].noMoves){
+  const q = questions[step];
+  if (q.noMoves) {
     const r = container.getBoundingClientRect();
+    const bw = noBtn.offsetWidth;
+    const bh = noBtn.offsetHeight;
+    const maxX = Math.max(0, r.width - bw);
+    const maxY = Math.max(0, r.height - bh);
     noBtn.classList.add("running");
-    noBtn.style.left = Math.random()*(r.width-100) + "px";
-    noBtn.style.top  = Math.random()*(r.height-50) + "px";
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top  = Math.random() * maxY + "px";
     return;
   }
   step++;
@@ -411,35 +436,44 @@ function showFinalScreen(){
   document.querySelector(".buttons").style.display = "none";
 }
 
-// Confetti Animation
+// Confetti Animation (requestAnimationFrame for smoother, battery-friendly animation)
 const canvas = document.getElementById("confetti");
 const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-window.addEventListener('resize', ()=>{
+let confettiPieces = Array.from({ length: 120 }, () => ({ x: 0, y: 0, r: Math.random() * 6 + 4, c: `hsl(${Math.random() * 360},100%,60%)` }));
+let confettiRAF = null;
+const CONFETTI_DURATION = 8000;
+
+function drawConfettiFrame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  confettiPieces.forEach(o => {
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+    ctx.fillStyle = o.c;
+    ctx.fill();
+    o.y += 3;
+    if (o.y > canvas.height) o.y = -10;
+  });
+}
+
+function startConfetti() {
+  confettiPieces.forEach(o => { o.x = Math.random() * canvas.width; o.y = Math.random() * canvas.height; });
+  if (confettiRAF) cancelAnimationFrame(confettiRAF);
+  const start = performance.now();
+  function loop(now) {
+    if (now - start >= CONFETTI_DURATION) return;
+    drawConfettiFrame();
+    confettiRAF = requestAnimationFrame(loop);
+  }
+  confettiRAF = requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 });
-
-var confettiPieces = Array.from({ length: 120 }, function(){ return { x:0, y:0, r: Math.random()*6+4, c: 'hsl(' + Math.random()*360 + ',100%,60%)' }; });
-var confettiInterval = null;
-function startConfetti(){
-  confettiPieces.forEach(function(o){ o.x = Math.random()*canvas.width; o.y = Math.random()*canvas.height; });
-  if (confettiInterval) clearInterval(confettiInterval);
-  confettiInterval = setInterval(function() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    confettiPieces.forEach(function(o){
-      ctx.beginPath();
-      ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
-      ctx.fillStyle = o.c;
-      ctx.fill();
-      o.y += 3;
-      if (o.y > canvas.height) o.y = -10;
-    });
-  }, 30);
-  setTimeout(function(){ clearInterval(confettiInterval); confettiInterval = null; }, 8000);
-}
 
 // Initial Screen
 updateScreen();
@@ -450,40 +484,64 @@ updateScreen();
   
   const pCanvas = document.getElementById("particleBg");
   const pCtx = pCanvas.getContext("2d");
-  let w, h, particles = [], mouse = {x:null,y:null};
-  
-  function resizeP(){
-    w = pCanvas.width = innerWidth;
-    h = pCanvas.height = innerHeight;
+  let w, h, particles = [], mouse = { x: null, y: null };
+
+  function getSize() {
+    const v = window.visualViewport;
+    if (v && v.width && v.height) return { w: v.width, h: v.height };
+    return { w: document.documentElement.clientWidth || innerWidth, h: document.documentElement.clientHeight || innerHeight };
+  }
+  function resizeP() {
+    const s = getSize();
+    w = pCanvas.width = s.w;
+    h = pCanvas.height = s.h;
     initParticles();
   }
-  window.addEventListener("resize", resizeP);
+  let resizeT = null;
+  function debouncedResize() {
+    if (resizeT) clearTimeout(resizeT);
+    resizeT = setTimeout(resizeP, 80);
+  }
+  window.addEventListener("resize", debouncedResize);
+  window.addEventListener("orientationchange", () => setTimeout(resizeP, 100));
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", debouncedResize);
+  window.addEventListener("load", () => setTimeout(resizeP, 50));
   
   window.addEventListener("mousemove", e=>{
     mouse.x = e.clientX;
     mouse.y = e.clientY;
   });
+  window.addEventListener("touchstart", e=>{
+    if (e.touches[0]) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
+  }, { passive: true });
   window.addEventListener("touchmove", e=>{
-    mouse.x = e.touches[0].clientX;
-    mouse.y = e.touches[0].clientY;
-  });
+    if (e.touches[0]) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; }
+  }, { passive: true });
   
-  function initParticles(){
-    particles=[];
-    const text = "LOVE"; // 👉 yaha naam change kar sakte ho
+  function initParticles() {
+    particles = [];
+    const text = "LOVE";
     const temp = document.createElement("canvas");
     const tctx = temp.getContext("2d");
     temp.width = w;
     temp.height = h;
-    tctx.fillStyle="#fff";
-    tctx.font = "bold 160px Playfair Display";
-    tctx.textAlign="center";
-    tctx.fillText(text,w/2,h/1.12);
+    tctx.fillStyle = "#fff";
+    const fontSize = Math.max(52, Math.min(160, w * 0.42, h * 0.28));
+    tctx.font = `${fontSize}px Playfair Display`;
+    tctx.textAlign = "center";
+    const textX = w / 2, textY = h / 1.12;
+    tctx.strokeStyle = "#fff";
+    tctx.lineWidth = Math.max(1, fontSize * 0.02);
+    tctx.lineJoin = "round";
+    tctx.strokeText(text, textX, textY);
+    tctx.fillText(text, textX, textY);
   
     const data = tctx.getImageData(0,0,w,h).data;
-    for(let y=0;y<h;y+=8){
-      for(let x=0;x<w;x+=8){
-        if(data[(y*w+x)*4+3]>120){
+    const step = 9; // aur thoda spaced, thin look
+    const maxParticles = w < 600 ? 700 : 1200;
+    for(let y=0;y<h && particles.length<maxParticles;y+=step){
+      for(let x=0;x<w && particles.length<maxParticles;x+=step){
+        if(data[(y*w+x)*4+3]>95){
           particles.push({
             x:Math.random()*w,
             y:Math.random()*h,
@@ -495,39 +553,39 @@ updateScreen();
     }
   }
   
-  function animateP(){
-    pCtx.clearRect(0,0,w,h);
-    particles.forEach(p=>{
-      p.vx += (p.tx-p.x)*0.005;
-      p.vy += (p.ty-p.y)*0.005;
-  
-      if(mouse.x){
-        const dx=p.x-mouse.x, dy=p.y-mouse.y;
-        const d=Math.hypot(dx,dy);
-        if(d<120){
-          p.vx += dx*0.05;
-          p.vy += dy*0.05;
-        }
+  function animateP() {
+    const isMobile = (window.visualViewport && window.visualViewport.width < 768) || document.documentElement.clientWidth < 768;
+    const lineDist = isMobile ? 75 : 110;
+    const lineOpacity = isMobile ? 0.38 : 0.58;
+    const lineW = isMobile ? 1 : 1.2;
+
+    pCtx.clearRect(0, 0, w, h);
+    particles.forEach(p => {
+      p.vx += (p.tx - p.x) * 0.014;
+      p.vy += (p.ty - p.y) * 0.014;
+      if (mouse.x != null) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 120) { p.vx += dx * 0.05; p.vy += dy * 0.05; }
       }
-  
-      p.x+=p.vx; p.y+=p.vy;
-      p.vx*=0.9; p.vy*=0.9;
-  
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.9; p.vy *= 0.9;
       pCtx.beginPath();
-      pCtx.arc(p.x,p.y,2.2,0,Math.PI*2);
-      pCtx.fillStyle="rgba(255,95,162,0.42)";
+      pCtx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+      pCtx.fillStyle = "rgba(255,79,154,0.68)";
       pCtx.fill();
     });
-  
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const a=particles[i], b=particles[j];
-        const d=Math.hypot(a.x-b.x,a.y-b.y);
-        if(d<110){
-          pCtx.strokeStyle=`rgba(255,95,162,${0.45*(1-d/110)})`;
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < lineDist) {
+          pCtx.lineWidth = lineW;
+          pCtx.strokeStyle = `rgba(255,79,154,${lineOpacity * (1 - d / lineDist)})`;
           pCtx.beginPath();
-          pCtx.moveTo(a.x,a.y);
-          pCtx.lineTo(b.x,b.y);
+          pCtx.moveTo(a.x, a.y);
+          pCtx.lineTo(b.x, b.y);
           pCtx.stroke();
         }
       }
@@ -541,12 +599,18 @@ updateScreen();
   
   <footer style="
   position:fixed;
-  bottom:10px;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:10px 0;
+  padding-bottom:max(10px, env(safe-area-inset-bottom, 0px));
   width:100%;
   font-size:0.9rem;
   text-shadow:0 2px 5px rgba(0,0,0,.5);
-  z-index:10;
+  z-index:15;
   line-height:1.5;
+  background:linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+  pointer-events:auto;
 ">
 
   <div class="footer-inner">
@@ -607,18 +671,19 @@ updateScreen();
     if(shareBtn) shareBtn.addEventListener('click', handleShare);
 
     // Recipient flow: if ?to=PHONE present, show a prompt to reply YES to that number
-    function maskPhone(p){ var s = String(p); return s.slice(-4).padStart(s.length, '*'); }
+    function maskPhone(p) { const s = String(p); return s.slice(-4).padStart(s.length, '*'); }
 
-    function showRecipientPrompt(to){
-      var modal = document.createElement('div');
+    function showRecipientPrompt(to) {
+      const modal = document.createElement('div');
       modal.id = 'recipientModal';
       modal.setAttribute('role', 'dialog');
       modal.setAttribute('aria-labelledby', 'recipientModalTitle');
       Object.assign(modal.style, {
         position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
-        background:'rgba(0,0,0,0.5)', zIndex:9999, backdropFilter:'blur(4px)'
+        background:'rgba(0,0,0,0.5)', zIndex:9999, backdropFilter:'blur(4px)',
+        padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'
       });
-      modal.innerHTML = '<div style="background:#fff;padding:20px;border-radius:12px;max-width:360px;text-align:center;font-family:Quicksand,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.4)">' +
+      modal.innerHTML = '<div style="background:#fff;padding:20px;border-radius:12px;max-width:min(360px, calc(100vw - 32px));text-align:center;font-family:Quicksand,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.4)">' +
         '<h2 id="recipientModalTitle" style="margin-bottom:8px;color:#ff4f9a">Someone sent you a sweet link 💌</h2>' +
         '<p style="margin-bottom:12px;color:#333">Send a quick reply to <strong>+' + maskPhone(to) + '</strong></p>' +
         '<div style="display:flex;gap:10px;justify-content:center">' +
@@ -645,36 +710,46 @@ updateScreen();
 
 <script>
 
-particlesJS("particles-js", {
-  particles: {
-    number: { value: 55, density: { enable: true, value_area: 600 } },
-    color: { value: "#ff2f92" },
-    shape: { type: "circle" },
-    opacity: { value: 0.58, random: false },
-    size: { value: 3.5, random: true },
-    line_linked: {
-      enable: true,
-      distance: 140,
-      color: "#ff4fa6",
-      opacity: 0.38,
-      width: 1.1
+(function(){
+  particlesJS("particles-js", {
+    particles: {
+      number: { value: 12, density: { enable: true, value_area: 10 } },
+      color: { value: "#ff2f92" },
+      shape: { type: "circle" },
+      opacity: { value: 0.04, random: false },
+      size: { value: 2.5, random: true },
+      line_linked: {
+        enable: true,
+        distance: 130,
+        color: "#ff4fa6",
+        opacity: 0.03,
+        width: 1
+      },
+      move: { enable: true, speed: 1.8, out_mode: "out" }
     },
-    move: { enable: true, speed: 1.8, out_mode: "out" }
-  },
-  interactivity: {
-    detect_on: "canvas",
-    events: {
-      onhover: { enable: true, mode: ["repulse", "attract"] },
-      onclick: { enable: true, mode: "push" },
-      resize: true
+    interactivity: {
+      detect_on: "canvas",
+      events: {
+        onhover: { enable: true, mode: ["repulse", "attract"] },
+        onclick: { enable: true, mode: "push" },
+        resize: true
+      },
+      modes: {
+        repulse: { distance: 90, duration: 0.3 },
+        attract: { distance: 90, duration: 0.4, speed: 1.2 }
+      }
     },
-    modes: {
-      repulse: { distance: 90, duration: 0.3 },
-      attract: { distance: 90, duration: 0.4, speed: 1.2 }
+    retina_detect: true
+  });
+  setTimeout(() => {
+    const el = document.getElementById("particles-js");
+    if (el) {
+      el.style.background = "transparent";
+      const c = el.querySelector("canvas");
+      if (c) { c.style.background = "transparent"; c.style.backgroundColor = "transparent"; }
     }
-  },
-  retina_detect: true
-});
+  }, 100);
+})();
 
 
 </script>
